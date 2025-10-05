@@ -129,56 +129,54 @@ export const useCircuit = () => {
       return;
     }
 
-    // Find the components and pins
-    const firstPin = circuit.components
-      .flatMap(c => c.pins.map(p => ({ ...p, componentId: c.id })))
-      .find(p => p.id === firstPinId);
-    
-    const secondPin = circuit.components
-      .flatMap(c => c.pins.map(p => ({ ...p, componentId: c.id })))
-      .find(p => p.id === secondPinId);
-
-    if (!firstPin || !secondPin) {
-      setIsWiring(false);
-      setFirstPinId(null);
-      return;
-    }
-
-    // Don't allow connecting pins on the same component
-    if (firstPin.componentId === secondPin.componentId) {
-      setIsWiring(false);
-      setFirstPinId(null);
-      return;
-    }
-
-    // Create new wire
-    const newWire = {
-      id: `wire-${Date.now()}`,
-      fromPin: firstPinId,
-      toPin: secondPinId,
-      points: [
-        firstPin.position,
-        secondPin.position,
-      ],
-    };
-
     // Update circuit with new wire and mark pins as connected
-    setCircuit(prev => ({
-      ...prev,
-      wires: [...prev.wires, newWire],
-      components: prev.components.map(component => ({
-        ...component,
-        pins: component.pins.map(pin => ({
-          ...pin,
-          connected: pin.id === firstPinId || pin.id === secondPinId ? true : pin.connected,
+    setCircuit(prev => {
+      // Find the components and pins from current state
+      const firstPin = prev.components
+        .flatMap(c => c.pins.map(p => ({ ...p, componentId: c.id })))
+        .find(p => p.id === firstPinId);
+      
+      const secondPin = prev.components
+        .flatMap(c => c.pins.map(p => ({ ...p, componentId: c.id })))
+        .find(p => p.id === secondPinId);
+
+      if (!firstPin || !secondPin) {
+        return prev;
+      }
+
+      // Don't allow connecting pins on the same component
+      if (firstPin.componentId === secondPin.componentId) {
+        return prev;
+      }
+
+      // Create new wire
+      const newWire = {
+        id: `wire-${Date.now()}`,
+        fromPin: firstPinId,
+        toPin: secondPinId,
+        points: [
+          firstPin.position,
+          secondPin.position,
+        ],
+      };
+
+      return {
+        ...prev,
+        wires: [...prev.wires, newWire],
+        components: prev.components.map(component => ({
+          ...component,
+          pins: component.pins.map(pin => ({
+            ...pin,
+            connected: pin.id === firstPinId || pin.id === secondPinId ? true : pin.connected,
+          })),
         })),
-      })),
-    }));
+      };
+    });
 
     // Reset wiring state
     setIsWiring(false);
     setFirstPinId(null);
-  }, [firstPinId, circuit.components, setCircuit]);
+  }, [firstPinId]);
 
   const cancelWiring = useCallback(() => {
     setIsWiring(false);
