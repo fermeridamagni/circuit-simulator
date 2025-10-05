@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useState } from 'react';
-import { Stage, Layer, Group } from 'react-konva';
+import { Stage, Layer, Group, Line } from 'react-konva';
 import Konva from 'konva';
 import { ComponentRenderer } from './ComponentRenderer';
 import { WireRenderer } from './WireRenderer';
@@ -149,12 +149,9 @@ export const SchematicEditor: React.FC<SchematicEditorProps> = ({
     // Vertical lines
     for (let x = startX; x <= endX; x += GRID_SIZE) {
       lines.push(
-        <line
+        <Line
           key={`v-${x}`}
-          x1={x}
-          y1={startY}
-          x2={x}
-          y2={endY}
+          points={[x, startY, x, endY]}
           stroke="#e0e0e0"
           strokeWidth={0.5 / scale}
         />
@@ -164,12 +161,9 @@ export const SchematicEditor: React.FC<SchematicEditorProps> = ({
     // Horizontal lines
     for (let y = startY; y <= endY; y += GRID_SIZE) {
       lines.push(
-        <line
+        <Line
           key={`h-${y}`}
-          x1={startX}
-          y1={y}
-          x2={endX}
-          y2={y}
+          points={[startX, y, endX, y]}
           stroke="#e0e0e0"
           strokeWidth={0.5 / scale}
         />
